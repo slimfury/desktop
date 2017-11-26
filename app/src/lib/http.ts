@@ -142,7 +142,14 @@ function getUserAgent() {
  */
 export async function parsedResponse<T>(response: Response): Promise<T> {
   if (response.ok) {
-    return deserialize<T>(response)
+    const contentLength = response.headers.get('Content-Length') || '0'
+    const lengthValue = parseInt(contentLength, 10)
+
+    if (lengthValue > 0) {
+      return deserialize<T>(response)
+    } else {
+      throw new APIError(response, null)
+    }
   } else {
     let apiError: IAPIError | null
     // Deserializing the API error could throw. If it does, we'll throw a more
